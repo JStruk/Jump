@@ -4,11 +4,17 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 
 public class Jump extends ApplicationAdapter implements GestureDetector.GestureListener {
+    BitmapFont font;
     private World world;
     private Box2DDebugRenderer b2dr;
     public static final float fPpm = 100;
@@ -16,12 +22,44 @@ public class Jump extends ApplicationAdapter implements GestureDetector.GestureL
     public static final int nWidth = 320, nHeight = 240;
     private OrthographicCamera b2dCam;
     private CollisionDetector collisionDetector;
+    TextureAtlas textureAtlas;
+    Skin skin;
     private Body playerBody;
     GestureDetector gestureDetector;
-    //private MyContactListener cl;
+    float w, h;
+    Vector2 vPlat1, vPlat2;
+    EdgeShape edgeShape;
+    TextButton.TextButtonStyle tbsRight, tbsLeft;
+    TextButton tbRight, tbLeft;
+    Stage stage;
 
+    //  vPlat2(15,0);
+    //private MyContactListener cl;
     // public Play(GameStateManager gsm) {
     public void create() {
+        font = new BitmapFont();
+        stage = new Stage();
+        textureAtlas = new TextureAtlas(Gdx.files.internal("arrows.pack"));
+        skin = new Skin();
+        skin.addRegions(textureAtlas);
+        tbsRight = new TextButton.TextButtonStyle();
+        tbsLeft = new TextButton.TextButtonStyle();
+        tbsRight.up = skin.getDrawable("right");
+        tbsRight.down = skin.getDrawable("rightdown");
+        tbsLeft.up = skin.getDrawable("left");
+        tbsLeft.down = skin.getDrawable("lettdown");
+        tbsRight.font = font;
+        tbsLeft.font = font;
+        tbLeft = new TextButton("", tbsLeft);
+        tbRight = new TextButton("", tbsRight);
+        tbRight.setPosition(100, 200);
+        tbLeft.setPosition(10, 200);
+        stage.addActor(tbLeft);
+        stage.addActor(tbRight);
+        vPlat1 = new Vector2(-15, 0);
+        vPlat2 = new Vector2(15, 0);
+        w = Gdx.graphics.getWidth();
+        h = Gdx.graphics.getHeight();
 //        super(gsm);
         gestureDetector = new GestureDetector(this);
         Gdx.input.setInputProcessor(gestureDetector);
@@ -34,17 +72,24 @@ public class Jump extends ApplicationAdapter implements GestureDetector.GestureL
 
         // create platform
         BodyDef bdef = new BodyDef();
-        bdef.position.set(160 / fPpm, 120 / fPpm);
+        //  bdef.position.set(160 / fPpm, 120 / fPpm);7
+        bdef.position.set(160 / fPpm, 10 / fPpm);
         bdef.type = BodyDef.BodyType.StaticBody;
         Body body = world.createBody(bdef);
 
         PolygonShape shape = new PolygonShape();
         shape.setAsBox(50 / fPpm, 5 / fPpm);
+        //  edgeShape = new EdgeShape();
+        //edgeShape.set(vPlat1, vPlat2);
+        // shape.setasEdge(vPlat1, vPlat2 ); //ends of the line);
         FixtureDef fdef = new FixtureDef();
         fdef.shape = shape;
         fdef.filter.categoryBits = shGround;
         fdef.filter.maskBits = shPlayer;
+
         body.createFixture(fdef).setUserData("ground");
+        FixtureDef ground = new FixtureDef();
+
 
         // create player
         bdef.position.set(160 / fPpm, 200 / fPpm);
@@ -98,6 +143,11 @@ public class Jump extends ApplicationAdapter implements GestureDetector.GestureL
 
         // draw box2d world
         b2dr.render(world, b2dCam.combined);
+        //super.render();
+        //stage.draw();
+        if (Input.MoveLeft()) {
+            playerBody.setLinearVelocity(10f, 0f);
+        }
 
     }
 
@@ -111,10 +161,10 @@ public class Jump extends ApplicationAdapter implements GestureDetector.GestureL
 
     @Override
     public boolean tap(float x, float y, int count, int button) {
-       // if (CollisionDetector.hitTest()) {
+        if (CollisionDetector.hitTest()) {
             System.out.println("tap");
             playerBody.applyForceToCenter(0, 200, true);
-        //}
+        }
         return false;
     }
 

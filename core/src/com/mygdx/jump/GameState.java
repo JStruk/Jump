@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 /**
  * Created by Justin on 2015-04-07.
  */
-public class GameState {
+public abstract class GameState {
 
     protected GameStateManager gsm;
     protected Game game;
@@ -23,30 +23,9 @@ public class GameState {
         hudCam = game.getHUDCamera();
     }
 
-    public void handleInput() {
-
-    }
-
-    public void update(float dt) {
-
-    }
-
-    public void render() {
-
-    }
-
-    public void dispose() {
-
-    }
+    public abstract void handleInput();
+    public abstract void update(float dt);
+    public abstract void render();
+    public abstract void dispose();
 
 }
-
-
-
-
-
-
-
-
-
-
